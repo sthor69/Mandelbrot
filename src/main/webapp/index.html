@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Mandelbrot Set Viewer</title>
+    <style>
+        body { font-family: sans-serif; text-align: center; }
+        #mandelbrot-container {
+            position: relative;
+            display: inline-block;
+            cursor: crosshair;
+        }
+        #instructions {
+            margin-top: 10px;
+            color: #555;
+        }
+    </style>
+</head>
+<body>
+    <h1>Mandelbrot Set Viewer</h1>
+    <div id="mandelbrot-container">
+        <img id="mandelbrot-img" alt="Mandelbrot Set" />
+    </div>
+    <div id="instructions">
+        Left-click to zoom in, Right-click to zoom out.
+    </div>
+
+    <script>
+        const img = document.getElementById('mandelbrot-img');
+        const container = document.getElementById('mandelbrot-container');
+
+        const width = 800;
+        const height = 600;
+
+        let centerX = -0.7;
+        let centerY = 0;
+        let scale = 4.0;
+
+        function updateImage() {
+            const params = new URLSearchParams({
+                width: width,
+                height: height,
+                centerX: centerX,
+                centerY: centerY,
+                scale: scale,
+                // Add a cache-busting parameter
+                t: new Date().getTime()
+            });
+            img.src = `mandelbrot?${params.toString()}`;
+            img.width = width;
+            img.height = height;
+        }
+
+        img.addEventListener('mousedown', (e) => {
+            e.preventDefault(); // Prevent default browser actions like dragging image
+
+            const rect = img.getBoundingClientRect();
+            const mouseX = e.clientX - rect.left;
+            const mouseY = e.clientY - rect.top;
+
+            if (e.button === 0) { // Left mouse button
+                // Convert pixel coordinates to complex plane coordinates
+                centerX += (mouseX - width / 2.0) * scale / width;
+                centerY += (mouseY - height / 2.0) * scale / width;
+                scale *= 0.5; // Zoom in
+            } else if (e.button === 2) { // Right mouse button
+                scale *= 2.0; // Zoom out
+            }
+
+            updateImage();
+        });
+
+        // Prevent context menu on right-click
+        img.addEventListener('contextmenu', (e) => e.preventDefault());
+
+        // Initial image load
+        updateImage();
+    </script>
+</body>
+</html>
